@@ -216,29 +216,35 @@ export default function Page() {
   };
 
   const renderBio = () => (
-    <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-      <div className="relative h-64 w-full border border-neutral-200 bg-neutral-100 sm:h-80">
-        <Image
-          src={profile.coverImage}
-          alt={`${profile.name} cover`}
-          fill
-          className="object-cover"
-          priority
-          sizes="(min-width: 768px) 720px, 100vw"
-        />
-      </div>
-      <div className="mt-6 space-y-3">
-        <h1 className="text-4xl font-light tracking-tight sm:text-5xl">{profile.name}</h1>
-        <p className="text-sm uppercase tracking-[0.28em] text-neutral-500">
-          b. {profile.birthYear}, {profile.location}
-        </p>
-        <p className="text-base leading-7 text-neutral-700">{profile.summary}</p>
-      </div>
-      <div className="mt-10 space-y-4 text-base leading-7 text-neutral-700">
-        {bioCopy.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
-        ))}
-      </div>
+    <div
+      className="flex min-w-full justify-center bg-neutral-100 px-4 pb-16 pt-10 sm:px-6"
+      style={sectionStyle}
+    >
+      <article className="flex w-full max-w-xl flex-col border border-neutral-200 bg-white">
+        <div className="relative aspect-[5/6] border-b border-neutral-200 bg-neutral-50">
+          <Image
+            src={profile.coverImage}
+            alt={`${profile.name} cover`}
+            fill
+            className="object-cover"
+            priority
+            sizes="(min-width: 768px) 640px, 100vw"
+          />
+        </div>
+        <div className="space-y-1 px-6 py-8 text-center text-neutral-800">
+          <h1 className="text-3xl font-light sm:text-4xl">{profile.name}</h1>
+          <p className="text-sm text-neutral-600">Lives and works in {profile.location}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
+            B. {profile.birthYear}
+          </p>
+        </div>
+        <div className="space-y-5 border-t border-neutral-200 px-6 py-8 text-base leading-7 text-neutral-700">
+          <p>{profile.summary}</p>
+          {bioCopy.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+      </article>
     </div>
   );
 
