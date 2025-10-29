@@ -40,8 +40,7 @@ const profile = {
   location: "Brooklyn, New York",
   summary:
     "Interdisciplinary artist working with light, sound, and projection to translate private archives into live environments.",
-  coverImage:
-    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1600&q=80",
+  coverImage: "/art/hero-art.png",
   enquiriesEmail: "studio@ava-martinez.art",
 };
 
@@ -85,8 +84,7 @@ const works: Work[] = [
     medium: "Holographic resin, projection mapping",
     dimensions: "240 × 160 × 60 cm",
     price: "Available on request",
-    image:
-      "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1400&q=80",
+    image: "/art/art-1.png",
   },
   {
     title: "Night Data",
@@ -94,8 +92,7 @@ const works: Work[] = [
     medium: "Custom LED array, multichannel audio",
     dimensions: "Room-responsive installation",
     price: "Edition of 3",
-    image:
-      "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?auto=format&fit=crop&w=1400&q=80",
+    image: "/art/art-2.png",
   },
   {
     title: "Memory Field",
@@ -103,8 +100,7 @@ const works: Work[] = [
     medium: "Etched glass, projection, live capture",
     dimensions: "620 × 420 cm installation",
     price: "Commission only",
-    image:
-      "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1400&q=80",
+    image: "/art/art-3.png",
   },
   {
     title: "Aperture Study",
@@ -112,8 +108,7 @@ const works: Work[] = [
     medium: "Backlit glass, archival film, sound",
     dimensions: "140 × 90 cm",
     price: "Sold",
-    image:
-      "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1400&q=80",
+    image: "/art/art-4.png",
   },
 ];
 
@@ -126,8 +121,7 @@ const exhibitions: Exhibition[] = [
     status: "On view",
     summary:
       "Immersive light environment that shifts colour temperature with visitor flow and pairs on-site work with a remote documentation kit.",
-    image:
-      "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?auto=format&fit=crop&w=1600&q=80",
+    image: "/exhibitions/show-1.png",
   },
   {
     title: "Sensors & Sentiments",
@@ -137,8 +131,7 @@ const exhibitions: Exhibition[] = [
     status: "Recent",
     summary:
       "Group exhibition focused on intimate technologies. Presented Night Data with live sensor-responsive performance.",
-    image:
-      "https://images.unsplash.com/photo-1471295253337-3ceaaedca402?auto=format&fit=crop&w=1600&q=80",
+    image: "/exhibitions/show-2.png",
   },
   {
     title: "Signal Festival Commission",
@@ -148,8 +141,7 @@ const exhibitions: Exhibition[] = [
     status: "Archive",
     summary:
       "Projection mapping commission translating family photo archives into dynamic street-scale visuals across historic facades.",
-    image:
-      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1600&q=80",
+    image: "/exhibitions/show-3.png",
   },
 ];
 
