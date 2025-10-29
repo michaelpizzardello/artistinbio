@@ -127,7 +127,7 @@ const exhibitions: Exhibition[] = [
     summary:
       "Immersive light environment that shifts colour temperature with visitor flow and pairs on-site work with a remote documentation kit.",
     image:
-      "https://images.unsplash.com/photo-1526402469554-49ae4e56c5b8?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?auto=format&fit=crop&w=1600&q=80",
   },
   {
     title: "Sensors & Sentiments",
@@ -174,6 +174,7 @@ const contacts = [
 export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAllWorks, setShowAllWorks] = useState(false);
+  const [worksSort, setWorksSort] = useState<"newest" | "oldest">("newest");
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
@@ -243,31 +244,50 @@ export default function Page() {
 
   const renderCV = () => (
     <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-      <h2 className="text-2xl uppercase tracking-[0.2em] text-neutral-600">CV</h2>
-      <div className="mt-6 space-y-4">
+      <div className="space-y-6 text-sm text-neutral-700">
         {cvSections.map((section) => (
-          <details key={section.title} className="border border-neutral-200">
-            <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-800">
-              {section.title}
-            </summary>
-            <ul className="space-y-2 border-t border-neutral-200 px-4 py-3 text-sm text-neutral-600">
+          <div key={section.title} className="border border-neutral-200 px-4 py-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{section.title}</p>
+            <ul className="mt-3 space-y-2">
               {section.items.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
-          </details>
+          </div>
         ))}
       </div>
     </div>
   );
 
   const renderWorks = () => {
+    const sortedWorks = [...works].sort((a, b) => {
+      const yearA = parseInt(a.year, 10);
+      const yearB = parseInt(b.year, 10);
+      return worksSort === "newest" ? yearB - yearA : yearA - yearB;
+    });
+
     if (showAllWorks) {
       return (
         <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-          <h2 className="text-2xl uppercase tracking-[0.2em] text-neutral-600">Works</h2>
+          <div className="flex flex-wrap items-center gap-3 border border-neutral-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-600">
+            <button
+              type="button"
+              onClick={() => setWorksSort("newest")}
+              className={`px-3 py-1 ${worksSort === "newest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+            >
+              Newest
+            </button>
+            <button
+              type="button"
+              onClick={() => setWorksSort("oldest")}
+              className={`px-3 py-1 ${worksSort === "oldest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+            >
+              Oldest
+            </button>
+            <span className="ml-auto text-[11px] text-neutral-500">Catalogue view</span>
+          </div>
           <div className="mt-6 space-y-3">
-            {works.map((work) => (
+            {sortedWorks.map((work) => (
               <div key={work.title} className="flex items-start gap-3 border border-neutral-200 p-3">
                 <div className="relative h-20 w-20 bg-neutral-100">
                   <Image
@@ -301,22 +321,37 @@ export default function Page() {
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => setShowAllWorks(false)}
-            className="mt-6 border border-neutral-900 px-5 py-2 text-xs uppercase tracking-[0.2em] text-neutral-900"
-          >
-            Show featured view
-          </button>
         </div>
       );
     }
 
-    const featured = works.slice(0, 3);
+    const featured = sortedWorks.slice(0, 3);
 
     return (
       <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-        <h2 className="text-2xl uppercase tracking-[0.2em] text-neutral-600">Works</h2>
+        <div className="flex flex-wrap items-center gap-3 border border-neutral-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-600">
+          <button
+            type="button"
+            onClick={() => setWorksSort("newest")}
+            className={`px-3 py-1 ${worksSort === "newest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+          >
+            Newest
+          </button>
+          <button
+            type="button"
+            onClick={() => setWorksSort("oldest")}
+            className={`px-3 py-1 ${worksSort === "oldest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+          >
+            Oldest
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAllWorks((prev) => !prev)}
+            className="ml-auto border border-neutral-900 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-900"
+          >
+            {showAllWorks ? "View less" : "View all"}
+          </button>
+        </div>
         <div className="mt-6 space-y-8">
           {featured.map((work) => (
             <article key={work.title} className="border border-neutral-200">
@@ -352,43 +387,33 @@ export default function Page() {
             </article>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => setShowAllWorks(true)}
-          className="mt-8 border border-neutral-900 px-5 py-2 text-xs uppercase tracking-[0.2em] text-neutral-900"
-        >
-          View more works
-        </button>
       </div>
     );
   };
 
   const renderExhibitions = () => (
     <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-      <h2 className="text-2xl uppercase tracking-[0.2em] text-neutral-600">Exhibitions</h2>
-      <div className="mt-6 space-y-4">
-        {exhibitions.map((show, index) => (
-          <details key={show.title} open={index === 0} className="border border-neutral-200">
-            <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-800">
-              {show.title} · {show.status}
-            </summary>
-            <div className="space-y-3 border-t border-neutral-200 px-4 py-3 text-sm text-neutral-600">
-              <div className="relative h-48 w-full border border-neutral-200 bg-neutral-100">
-                <Image
-                  src={show.image}
-                  alt={`${show.title} installation view`}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 768px) 720px, 100vw"
-                />
-              </div>
+      <div className="space-y-6 text-sm text-neutral-700">
+        {exhibitions.map((show) => (
+          <article key={show.title} className="border border-neutral-200">
+            <div className="relative h-48 w-full border-b border-neutral-200 bg-neutral-100">
+              <Image
+                src={show.image}
+                alt={`${show.title} installation view`}
+                fill
+                className="object-cover"
+                sizes="(min-width: 768px) 720px, 100vw"
+              />
+            </div>
+            <div className="space-y-2 px-4 py-4">
+              <p className="text-neutral-900">{show.title} · {show.status}</p>
               <p>
                 {show.venue} · {show.location}
               </p>
               <p>{show.dates}</p>
               <p>{show.summary}</p>
             </div>
-          </details>
+          </article>
         ))}
       </div>
     </div>
@@ -396,8 +421,7 @@ export default function Page() {
 
   const renderContact = () => (
     <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-      <h2 className="text-2xl uppercase tracking-[0.2em] text-neutral-600">Contact</h2>
-      <div className="mt-6 grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
+      <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
         {contacts.map((item) => (
           <Link key={item.label} href={item.href} className="border border-neutral-200 px-4 py-4">
             <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{item.label}</p>
