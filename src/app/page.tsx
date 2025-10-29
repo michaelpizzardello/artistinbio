@@ -1,6 +1,6 @@
 'use client';
 
-import type { TouchEvent } from "react";
+import type { ReactElement, TouchEvent } from "react";
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -408,7 +408,7 @@ export default function Page() {
     </div>
   );
 
-  const contentById: Record<SectionId, () => JSX.Element> = {
+  const contentById: Record<SectionId, () => ReactElement> = {
     bio: renderBio,
     cv: renderCV,
     works: renderWorks,
