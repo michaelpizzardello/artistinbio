@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactElement, TouchEvent } from "react";
+import type { CSSProperties, ReactElement, TouchEvent } from "react";
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -35,17 +35,17 @@ const sections: { id: SectionId; label: string }[] = [
 ];
 
 const profile = {
-  name: "Ava Martinez",
+  name: "Daniel Richter",
   birthYear: 1991,
   location: "Brooklyn, New York",
   summary:
     "Interdisciplinary artist working with light, sound, and projection to translate private archives into live environments.",
-  coverImage: "/art/hero-art.png",
+  coverImage: "/artist/image.png",
   enquiriesEmail: "studio@ava-martinez.art",
 };
 
 const bioCopy = [
-  "Ava Martinez develops light-based installations that react to visitor presence and archival footage. Her practice merges sculptural glass, projection mapping, and responsive audio to examine how memory occupies physical space.",
+  "Daniel Richter develops light-based installations that react to visitor presence and archival footage. Her practice merges sculptural glass, projection mapping, and responsive audio to examine how memory occupies physical space.",
   "Works are produced in modular components so they can travel between institutions, civic commissions, and remote presentations without losing detail or atmosphere.",
 ];
 
@@ -163,7 +163,8 @@ const contacts = [
   },
 ];
 
-const NAV_BAR_HEIGHT = 64;
+const NAV_BAR_HEIGHT = 52;
+const SLIDER_HEIGHT = `calc(100vh - ${NAV_BAR_HEIGHT}px)`;
 
 export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -203,25 +204,27 @@ export default function Page() {
 
   const sliderStyle = {
     transform: `translateX(-${activeIndex * 100}%)`,
-  };
+  } as const;
 
-  const sectionStyle = {
-    minHeight: `calc(100vh - ${NAV_BAR_HEIGHT}px)`,
+  const sectionStyle: CSSProperties = {
+    height: SLIDER_HEIGHT,
   };
 
   const renderBio = () => (
     <div
-      className="flex min-w-full justify-center bg-neutral-100 px-4 pb-12 pt-10 sm:px-6"
+      className="flex basis-full min-w-full flex-shrink-0 justify-center bg-neutral-100"
       style={sectionStyle}
     >
-      <article className="flex w-full max-w-xl flex-col border border-neutral-200 bg-white">
-        <div className="relative aspect-[5/6] border-b border-neutral-200 bg-neutral-50">
+      <div className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 py-8 sm:px-6">
+        <article className="flex w-full flex-col border border-neutral-200 bg-white">
+        <div className="border-b border-neutral-200 bg-white p-4">
           <Image
             src={profile.coverImage}
             alt={`${profile.name} cover`}
-            fill
-            className="object-cover"
+            width={1200}
+            height={1600}
             priority
+            className="h-auto w-full object-contain"
             sizes="(min-width: 768px) 640px, 100vw"
           />
         </div>
@@ -238,23 +241,26 @@ export default function Page() {
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-      </article>
+        </article>
+      </div>
     </div>
   );
 
   const renderCV = () => (
-    <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
-      <div className="space-y-6 text-sm text-neutral-700">
-        {cvSections.map((section) => (
-          <div key={section.title} className="border border-neutral-200 px-4 py-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{section.title}</p>
-            <ul className="mt-3 space-y-2">
-              {section.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
+    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
+      <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-10 sm:px-10">
+        <div className="space-y-6 text-sm text-neutral-700">
+          {cvSections.map((section) => (
+            <div key={section.title} className="border border-neutral-200 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{section.title}</p>
+              <ul className="mt-3 space-y-2">
+                {section.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -268,147 +274,160 @@ export default function Page() {
     const featured = sortedWorks.slice(0, 3);
 
     return (
-      <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
-        <div className="flex flex-wrap items-center gap-3 border border-neutral-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-600">
-          <button
-            type="button"
-            onClick={() => setWorksSort("newest")}
-            className={`px-3 py-1 ${worksSort === "newest" ? "bg-neutral-900 text-white" : "bg-white"}`}
-          >
-            Newest
-          </button>
-          <button
-            type="button"
-            onClick={() => setWorksSort("oldest")}
-            className={`px-3 py-1 ${worksSort === "oldest" ? "bg-neutral-900 text-white" : "bg-white"}`}
-          >
-            Oldest
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowAllWorks((prev) => !prev)}
-            className="ml-auto border border-neutral-900 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-900"
-          >
-            {showAllWorks ? "View less" : "View all"}
-          </button>
+      <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
+        <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-10 sm:px-10">
+          <div className="flex flex-wrap items-center gap-3 border border-neutral-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-600">
+            <button
+              type="button"
+              onClick={() => setWorksSort("newest")}
+              className={`px-3 py-1 ${worksSort === "newest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+            >
+              Newest
+            </button>
+            <button
+              type="button"
+              onClick={() => setWorksSort("oldest")}
+              className={`px-3 py-1 ${worksSort === "oldest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+            >
+              Oldest
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAllWorks((prev) => !prev)}
+              className="ml-auto border border-neutral-900 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-900"
+            >
+              {showAllWorks ? "View less" : "View all"}
+            </button>
+          </div>
+
+          {showAllWorks ? (
+            <div className="mt-6 space-y-3">
+              {sortedWorks.map((work) => (
+                <div key={work.title} className="flex items-start gap-4 border border-neutral-200 p-3">
+                  <div className="shrink-0 bg-neutral-100 p-1">
+                    <Image
+                      src={work.image}
+                      alt={`${work.title} thumbnail`}
+                      width={200}
+                      height={200}
+                      className="h-auto w-20 object-contain"
+                      sizes="80px"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col text-[13px] text-neutral-700">
+                    <span className="text-base text-neutral-900">{work.title}</span>
+                    <span>{work.year}</span>
+                    <span>{work.medium}</span>
+                    <span>{work.dimensions}</span>
+                    <span>{work.price}</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.open(
+                          `mailto:${profile.enquiriesEmail}?subject=Artwork enquiry: ${encodeURIComponent(
+                            work.title,
+                          )}`,
+                        )
+                      }
+                      className="mt-3 w-fit border border-neutral-900 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-neutral-900"
+                    >
+                      Enquire
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6 space-y-8">
+              {featured.map((work) => (
+                <article key={work.title} className="border border-neutral-200 bg-white">
+                  <div className="bg-neutral-100 p-4">
+                    <Image
+                      src={work.image}
+                      alt={`${work.title} artwork`}
+                      width={1600}
+                      height={1200}
+                      className="h-auto w-full object-contain"
+                      sizes="(min-width: 768px) 720px, 100vw"
+                    />
+                  </div>
+                  <div className="space-y-1 px-4 py-4 text-sm text-neutral-700">
+                    <p className="text-lg text-neutral-900">{work.title}</p>
+                    <p>{work.year}</p>
+                    <p>{work.medium}</p>
+                    <p>{work.dimensions}</p>
+                    <p>{work.price}</p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.open(
+                          `mailto:${profile.enquiriesEmail}?subject=Artwork enquiry: ${encodeURIComponent(
+                            work.title,
+                          )}`,
+                        )
+                      }
+                      className="mt-3 border border-neutral-900 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-900"
+                    >
+                      Enquire
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
-        {showAllWorks ? (
-          <div className="mt-6 space-y-3">
-            {sortedWorks.map((work) => (
-              <div key={work.title} className="flex items-start gap-3 border border-neutral-200 p-3">
-                <div className="relative h-20 w-20 bg-neutral-100">
-                  <Image
-                    src={work.image}
-                    alt={`${work.title} thumbnail`}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                  />
-                </div>
-                <div className="flex flex-1 flex-col text-[13px] text-neutral-700">
-                  <span className="text-base text-neutral-900">{work.title}</span>
-                  <span>{work.year}</span>
-                  <span>{work.medium}</span>
-                  <span>{work.dimensions}</span>
-                  <span>{work.price}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.open(
-                      `mailto:${profile.enquiriesEmail}?subject=Artwork enquiry: ${encodeURIComponent(
-                        work.title,
-                      )}`,
-                    )
-                  }
-                  className="border border-neutral-900 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-900"
-                >
-                  Enquire
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-6 space-y-8">
-            {featured.map((work) => (
-              <article key={work.title} className="border border-neutral-200">
-                <div className="relative aspect-[3/2] bg-neutral-100">
-                  <Image
-                    src={work.image}
-                    alt={`${work.title} artwork`}
-                    fill
-                    className="object-cover"
-                    sizes="(min-width: 768px) 720px, 100vw"
-                  />
-                </div>
-                <div className="space-y-1 px-4 py-4 text-sm text-neutral-700">
-                  <p className="text-lg text-neutral-900">{work.title}</p>
-                  <p>{work.year}</p>
-                  <p>{work.medium}</p>
-                  <p>{work.dimensions}</p>
-                  <p>{work.price}</p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      window.open(
-                        `mailto:${profile.enquiriesEmail}?subject=Artwork enquiry: ${encodeURIComponent(
-                          work.title,
-                        )}`,
-                      )
-                    }
-                    className="mt-3 border border-neutral-900 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-900"
-                  >
-                    Enquire
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
       </div>
     );
   };
 
+
   const renderExhibitions = () => (
-    <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
-      <div className="space-y-6 text-sm text-neutral-700">
-        {exhibitions.map((show) => (
-          <article key={show.title} className="border border-neutral-200">
-            <div className="relative h-48 w-full border-b border-neutral-200 bg-neutral-100">
-              <Image
-                src={show.image}
-                alt={`${show.title} installation view`}
-                fill
-                className="object-cover"
-                sizes="(min-width: 768px) 720px, 100vw"
-              />
-            </div>
-            <div className="space-y-2 px-4 py-4">
-              <p className="text-neutral-900">{show.title} · {show.status}</p>
-              <p>
-                {show.venue} · {show.location}
-              </p>
-              <p>{show.dates}</p>
-              <p>{show.summary}</p>
-            </div>
-          </article>
-        ))}
+    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
+      <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-10 sm:px-10">
+        <div className="space-y-6 text-sm text-neutral-700">
+          {exhibitions.map((show) => (
+            <article key={show.title} className="border border-neutral-200 bg-white">
+              <div className="border-b border-neutral-200 bg-neutral-100 p-4">
+                <Image
+                  src={show.image}
+                  alt={`${show.title} installation view`}
+                  width={1600}
+                  height={1100}
+                  className="h-auto w-full object-contain"
+                  sizes="(min-width: 768px) 720px, 100vw"
+                />
+              </div>
+              <div className="space-y-2 px-4 py-4">
+                <p className="text-neutral-900">{show.title} · {show.status}</p>
+                <p>
+                  {show.venue} · {show.location}
+                </p>
+                <p>{show.dates}</p>
+                <p>{show.summary}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </div>
   );
 
+
   const renderContact = () => (
-    <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
-      <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
-        {contacts.map((item) => (
-          <Link key={item.label} href={item.href} className="border border-neutral-200 px-4 py-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{item.label}</p>
-            <p className="mt-1 text-neutral-900">{item.value}</p>
-          </Link>
-        ))}
+    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
+      <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-10 sm:px-10">
+        <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
+          {contacts.map((item) => (
+            <Link key={item.label} href={item.href} className="border border-neutral-200 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{item.label}</p>
+              <p className="mt-1 text-neutral-900">{item.value}</p>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
+
 
   const contentById: Record<SectionId, () => ReactElement> = {
     bio: renderBio,
@@ -419,15 +438,16 @@ export default function Page() {
   };
 
   return (
-    <main className="bg-white text-neutral-900 pb-[64px]">
+    <main className="relative h-screen overflow-hidden bg-white text-neutral-900">
       <div
         className="overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        style={{ height: SLIDER_HEIGHT }}
       >
         <div
-          className="flex transition-transform duration-300 ease-out"
+          className="flex h-full w-full transition-transform duration-300 ease-out"
           style={sliderStyle}
         >
           {sections.map((section) => {
@@ -437,8 +457,11 @@ export default function Page() {
         </div>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white">
-        <div className="mx-auto flex w-full max-w-md divide-x divide-neutral-200 text-xs uppercase tracking-[0.2em] text-neutral-600">
+      <nav
+        className="fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white"
+        style={{ height: NAV_BAR_HEIGHT }}
+      >
+        <div className="mx-auto flex h-full w-full max-w-md divide-x divide-neutral-200 text-xs uppercase tracking-[0.2em] text-neutral-600">
           {sections.map((section, index) => {
             const isActive = index === activeIndex;
             return (
@@ -446,7 +469,7 @@ export default function Page() {
                 key={section.id}
                 type="button"
                 onClick={() => goToIndex(index)}
-                className={`flex-1 py-3 text-center ${
+                className={`flex h-full flex-1 items-center justify-center ${
                   isActive ? "bg-neutral-900 text-white" : "bg-white"
                 }`}
               >
