@@ -1,14 +1,7 @@
 'use client';
 
 import type { CSSProperties, ReactElement, TouchEvent } from "react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -171,73 +164,50 @@ const contacts = [
 ];
 
 const NAV_BAR_HEIGHT = 52;
-const SLIDER_HEIGHT = "100vh";
+const BOTTOM_INSET = `calc(${NAV_BAR_HEIGHT}px + env(safe-area-inset-bottom))`;
 
 export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAll, setShowAll] = useState(false);
   const [worksSort, setWorksSort] = useState<"newest" | "oldest">("newest");
+  const [navVisible, setNavVisible] = useState(true);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
-  const scrollContainers = useRef<Record<SectionId, HTMLDivElement | null>>({
-    bio: null,
-    cv: null,
-    works: null,
-    exhibitions: null,
-    contact: null,
-  });
-  const [navVisible, setNavVisible] = useState(true);
-  const navLastScroll = useRef(0);
-
-  const registerScrollContainer = useCallback(
-    (id: SectionId, node: HTMLDivElement | null) => {
-      scrollContainers.current[id] = node;
-    },
-    [],
-  );
-  const setBioScrollRef = useCallback(
-    (node: HTMLDivElement | null) => registerScrollContainer("bio", node),
-    [registerScrollContainer],
-  );
-  const setCVScrollRef = useCallback(
-    (node: HTMLDivElement | null) => registerScrollContainer("cv", node),
-    [registerScrollContainer],
-  );
-  const setWorksScrollRef = useCallback(
-    (node: HTMLDivElement | null) => registerScrollContainer("works", node),
-    [registerScrollContainer],
-  );
-  const setExhibitionsScrollRef = useCallback(
-    (node: HTMLDivElement | null) => registerScrollContainer("exhibitions", node),
-    [registerScrollContainer],
-  );
-  const setContactScrollRef = useCallback(
-    (node: HTMLDivElement | null) => registerScrollContainer("contact", node),
-    [registerScrollContainer],
-  );
+  const touchStartY = useRef<number | null>(null);
+  const touchEndY = useRef<number | null>(null);
 
   const goToIndex = (index: number) => {
     if (index < 0 || index >= sections.length) return;
-    navLastScroll.current = 0;
+    // Make sure navbar is visible when changing pages via controls
     setNavVisible(true);
     setActiveIndex(index);
   };
 
+  // Ensure navbar reappears whenever the page (section) changes
+  useEffect(() => {
+    setNavVisible(true);
+  }, [activeIndex]);
+
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     touchStartX.current = event.touches[0].clientX;
+    touchStartY.current = event.touches[0].clientY;
     touchEndX.current = null;
+    touchEndY.current = null;
   };
 
   const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
     touchEndX.current = event.touches[0].clientX;
+    touchEndY.current = event.touches[0].clientY;
   };
 
   const handleTouchEnd = () => {
     if (touchStartX.current === null || touchEndX.current === null) return;
-    const delta = touchStartX.current - touchEndX.current;
-    const threshold = 40;
-    if (Math.abs(delta) > threshold) {
-      if (delta > 0) {
+    const dx = touchStartX.current - touchEndX.current;
+    const dy = (touchStartY.current ?? 0) - (touchEndY.current ?? 0);
+    const threshold = 48; // require a stronger, horizontal-dominant swipe
+    const isHorizontalSwipe = Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy);
+    if (isHorizontalSwipe) {
+      if (dx > 0) {
         goToIndex(activeIndex + 1);
       } else {
         goToIndex(activeIndex - 1);
@@ -245,180 +215,19 @@ export default function Page() {
     }
     touchStartX.current = null;
     touchEndX.current = null;
+    touchStartY.current = null;
+    touchEndY.current = null;
   };
-
-  useEffect(() => {
-    const sectionId = sections[activeIndex].id;
-    const node = scrollContainers.current[sectionId];
-    if (!node) return;
-
-    const handleScroll = () => {
-      const current = node.scrollTop;
-      if (current <= 8) {
-        setNavVisible(true);
-      } else if (current > navLastScroll.current + 6) {
-        setNavVisible(false);
-      } else if (current < navLastScroll.current) {
-        setNavVisible(true);
-      }
-      navLastScroll.current = current;
-    };
-
-    navLastScroll.current = node.scrollTop;
-
-    node.addEventListener("scroll", handleScroll, { passive: true });
-    return () => node.removeEventListener("scroll", handleScroll);
-  }, [activeIndex]);
 
   const sliderStyle = {
     transform: `translateX(-${activeIndex * 100}%)`,
   } as const;
 
   const sectionStyle: CSSProperties = {
-    height: SLIDER_HEIGHT,
+    height: '100vh',
   };
 
-  const renderBio = () => (
-    <div
-      className="flex basis-full min-w-full flex-shrink-0 justify-center bg-neutral-100"
-      style={sectionStyle}
-    >
-      <div
-        ref={setBioScrollRef}
-        className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pb-8 pt-6 sm:px-6"
-        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
-      >
-        <article className="flex w-full flex-col">
-          <div className="bg-white">
-            <Image
-              src={profile.coverImage}
-              alt={`${profile.name} cover`}
-              width={1200}
-              height={1600}
-              priority
-              className="h-auto w-full object-contain"
-              sizes="(min-width: 768px) 640px, 100vw"
-            />
-          </div>
-          <div className="space-y-1 px-6 py-6 text-center text-neutral-800">
-            <h1 className="text-3xl font-light sm:text-4xl">{profile.name}</h1>
-            <p className="text-sm text-neutral-600">Lives and works in {profile.location}</p>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
-              B. {profile.birthYear}
-            </p>
-          </div>
-          <div className="space-y-5 border-t border-neutral-200 px-6 py-8 text-base leading-7 text-neutral-700">
-            <p>{profile.summary}</p>
-            {bioCopy.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-        </article>
-      </div>
-    </div>
-  );
-
-  const renderCV = () => (
-    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div
-        ref={setCVScrollRef}
-        className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pb-8 pt-6 sm:px-6"
-        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
-      >
-        <div className="space-y-6 text-sm text-neutral-700">
-          {cvSections.map((section) => (
-            <div key={section.title} className="border border-neutral-200 px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{section.title}</p>
-              <ul className="mt-3 space-y-2">
-                {section.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderWorks = () => {
-    return (
-      <WorksSection
-        works={works}
-        worksSort={worksSort}
-        setWorksSort={setWorksSort}
-        showAll={showAll}
-        setShowAll={setShowAll}
-        sectionStyle={sectionStyle}
-        enquiriesEmail={profile.enquiriesEmail}
-        navVisible={navVisible}
-        registerScrollContainer={setWorksScrollRef}
-      />
-    );
-  };
-
-  const renderExhibitions = () => (
-    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div
-        ref={setExhibitionsScrollRef}
-        className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10"
-        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
-      >
-        <div className="space-y-6 text-sm text-neutral-700">
-          {exhibitions.map((show) => (
-            <article key={show.title} className="border border-neutral-200 bg-white">
-              <div className="bg-neutral-100 p-4">
-                <Image
-                  src={show.image}
-                  alt={`${show.title} installation view`}
-                  width={1600}
-                  height={1100}
-                  className="h-auto w-full object-contain"
-                  sizes="(min-width: 768px) 720px, 100vw"
-                />
-              </div>
-              <div className="space-y-2 px-4 py-4">
-                <p className="text-neutral-900">{show.title} · {show.status}</p>
-                <p>
-                  {show.venue} · {show.location}
-                </p>
-                <p>{show.dates}</p>
-                <p>{show.summary}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-
-  const renderContact = () => (
-    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div
-        ref={setContactScrollRef}
-        className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-6 sm:px-10"
-        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
-      >
-        <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
-          {contacts.map((item) => (
-            <Link key={item.label} href={item.href} className="border border-neutral-200 px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{item.label}</p>
-              <p className="mt-1 text-neutral-900">{item.value}</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const contentById: Record<SectionId, () => ReactElement> = {
-    bio: renderBio,
-    cv: renderCV,
-    works: renderWorks,
-    exhibitions: renderExhibitions,
-    contact: renderContact,
-  };
+  // Note: render with stable component types to avoid remounting on nav visibility changes
 
   return (
     <main className="relative h-screen overflow-hidden bg-white text-neutral-900">
@@ -427,24 +236,70 @@ export default function Page() {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ height: SLIDER_HEIGHT }}
+        style={{ height: '100vh', touchAction: "pan-y pan-x" }}
       >
         <div
           className="flex h-full w-full transition-transform duration-300 ease-out"
           style={sliderStyle}
         >
           {sections.map((section) => {
-            const SectionContent = contentById[section.id];
-            return <SectionContent key={section.id} />;
+            switch (section.id) {
+              case 'bio':
+                return (
+                  <BioSection
+                    key={section.id}
+                    sectionStyle={sectionStyle}
+                    onNavVisibilityChange={setNavVisible}
+                  />
+                );
+              case 'cv':
+                return (
+                  <CVSection
+                    key={section.id}
+                    sectionStyle={sectionStyle}
+                    onNavVisibilityChange={setNavVisible}
+                  />
+                );
+              case 'works':
+                return (
+                  <WorksSection
+                    key={section.id}
+                    works={works}
+                    worksSort={worksSort}
+                    setWorksSort={setWorksSort}
+                    showAll={showAll}
+                    setShowAll={setShowAll}
+                    sectionStyle={sectionStyle}
+                    enquiriesEmail={profile.enquiriesEmail}
+                    onNavVisibilityChange={setNavVisible}
+                  />
+                );
+              case 'exhibitions':
+                return (
+                  <ExhibitionsSection
+                    key={section.id}
+                    sectionStyle={sectionStyle}
+                    onNavVisibilityChange={setNavVisible}
+                  />
+                );
+              case 'contact':
+                return (
+                  <ContactSection
+                    key={section.id}
+                    sectionStyle={sectionStyle}
+                    onNavVisibilityChange={setNavVisible}
+                  />
+                );
+              default:
+                return null;
+            }
           })}
         </div>
       </div>
 
       <nav
-        className={`fixed bottom-0 left-0 right-0 z-20 border-t border-neutral-200 bg-white transition-transform duration-200 ${
-          navVisible ? "translate-y-0" : "translate-y-full"
-        }`}
-        style={{ height: NAV_BAR_HEIGHT }}
+        className={`fixed bottom-0 left-0 right-0 z-20 border-t border-neutral-200 bg-white/95 backdrop-blur transition-transform duration-200 ${navVisible ? "translate-y-0" : "translate-y-full"}`}
+        style={{ height: NAV_BAR_HEIGHT, paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="mx-auto flex h-full w-full max-w-md divide-x divide-neutral-200 text-xs uppercase tracking-[0.2em] text-neutral-600">
           {sections.map((section, index) => {
@@ -476,8 +331,7 @@ type WorksSectionProps = {
   setShowAll: Dispatch<SetStateAction<boolean>>;
   sectionStyle: CSSProperties;
   enquiriesEmail: string;
-  navVisible: boolean;
-  registerScrollContainer: (node: HTMLDivElement | null) => void;
+  onNavVisibilityChange: (visible: boolean) => void;
 };
 
 function WorksSection({
@@ -488,32 +342,26 @@ function WorksSection({
   setShowAll,
   sectionStyle,
   enquiriesEmail,
-  navVisible,
-  registerScrollContainer,
+  onNavVisibilityChange,
 }: WorksSectionProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [toolbarVisible, setToolbarVisible] = useState(true);
   const lastScroll = useRef(0);
-  const setScrollNode = useCallback(
-    (node: HTMLDivElement | null) => {
-      scrollRef.current = node;
-      registerScrollContainer(node);
-    },
-    [registerScrollContainer],
-  );
 
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return;
-    lastScroll.current = node.scrollTop;
     const handleScroll = () => {
       const current = node.scrollTop;
       if (current <= 8) {
         setToolbarVisible(true);
+        onNavVisibilityChange(true);
       } else if (current > lastScroll.current + 6) {
         setToolbarVisible(false);
+        onNavVisibilityChange(false);
       } else if (current < lastScroll.current - 6) {
         setToolbarVisible(true);
+        onNavVisibilityChange(true);
       }
       lastScroll.current = current;
     };
@@ -530,11 +378,7 @@ function WorksSection({
 
   return (
     <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div
-        ref={setScrollNode}
-        className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10"
-        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
-      >
+        <div ref={scrollRef} className="flex h-full w-full flex-col overflow-y-auto px-6 pt-0 sm:px-10" style={{ paddingBottom: BOTTOM_INSET }}>
         <div
           className={`sticky top-0 z-10 -mx-6 border-b border-neutral-200 bg-white transition-transform duration-200 sm:-mx-10 ${toolbarVisible ? "translate-y-0" : "-translate-y-full"}`}
         >
@@ -644,6 +488,204 @@ function WorksSection({
             ))}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+type BaseSectionProps = {
+  sectionStyle: CSSProperties;
+  onNavVisibilityChange: (visible: boolean) => void;
+};
+
+function BioSection({ sectionStyle, onNavVisibilityChange }: BaseSectionProps) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const lastScroll = useRef(0);
+
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
+    const handleScroll = () => {
+      const current = node.scrollTop;
+      if (current <= 8) {
+        onNavVisibilityChange(true);
+      } else if (current > lastScroll.current + 6) {
+        onNavVisibilityChange(false);
+      } else if (current < lastScroll.current - 6) {
+        onNavVisibilityChange(true);
+      }
+      lastScroll.current = current;
+    };
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => node.removeEventListener("scroll", handleScroll);
+  }, [onNavVisibilityChange]);
+
+  return (
+    <div
+      className="flex basis-full min-w-full flex-shrink-0 justify-center bg-neutral-100"
+      style={sectionStyle}
+    >
+      <div ref={scrollRef} className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pt-6 sm:px-6" style={{ paddingBottom: BOTTOM_INSET }}>
+        <article className="flex w-full flex-col">
+          <div className="bg-white">
+            <Image
+              src={profile.coverImage}
+              alt={`${profile.name} cover`}
+              width={1200}
+              height={1600}
+              priority
+              className="h-auto w-full object-contain"
+              sizes="(min-width: 768px) 640px, 100vw"
+            />
+          </div>
+          <div className="space-y-1 px-6 py-6 text-center text-neutral-800">
+            <h1 className="text-3xl font-light sm:text-4xl">{profile.name}</h1>
+            <p className="text-sm text-neutral-600">Lives and works in {profile.location}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
+              B. {profile.birthYear}
+            </p>
+          </div>
+          <div className="space-y-5 border-t border-neutral-200 px-6 py-8 text-base leading-7 text-neutral-700">
+            <p>{profile.summary}</p>
+            {bioCopy.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+        </article>
+      </div>
+    </div>
+  );
+}
+
+function CVSection({ sectionStyle, onNavVisibilityChange }: BaseSectionProps) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const lastScroll = useRef(0);
+
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
+    const handleScroll = () => {
+      const current = node.scrollTop;
+      if (current <= 8) {
+        onNavVisibilityChange(true);
+      } else if (current > lastScroll.current + 6) {
+        onNavVisibilityChange(false);
+      } else if (current < lastScroll.current - 6) {
+        onNavVisibilityChange(true);
+      }
+      lastScroll.current = current;
+    };
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => node.removeEventListener("scroll", handleScroll);
+  }, [onNavVisibilityChange]);
+
+  return (
+    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
+      <div ref={scrollRef} className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pt-6 sm:px-6" style={{ paddingBottom: BOTTOM_INSET }}>
+        <div className="space-y-6 text-sm text-neutral-700">
+          {cvSections.map((section) => (
+            <div key={section.title} className="border border-neutral-200 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{section.title}</p>
+              <ul className="mt-3 space-y-2">
+                {section.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExhibitionsSection({ sectionStyle, onNavVisibilityChange }: BaseSectionProps) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const lastScroll = useRef(0);
+
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
+    const handleScroll = () => {
+      const current = node.scrollTop;
+      if (current <= 8) {
+        onNavVisibilityChange(true);
+      } else if (current > lastScroll.current + 6) {
+        onNavVisibilityChange(false);
+      } else if (current < lastScroll.current - 6) {
+        onNavVisibilityChange(true);
+      }
+      lastScroll.current = current;
+    };
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => node.removeEventListener("scroll", handleScroll);
+  }, [onNavVisibilityChange]);
+
+  return (
+    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
+      <div ref={scrollRef} className="flex h-full w-full flex-col overflow-y-auto px-6 pt-0 sm:px-10" style={{ paddingBottom: BOTTOM_INSET }}>
+        <div className="space-y-6 text-sm text-neutral-700">
+          {exhibitions.map((show) => (
+            <article key={show.title} className="border border-neutral-200 bg-white">
+              <div className="bg-neutral-100 p-4">
+                <Image
+                  src={show.image}
+                  alt={`${show.title} installation view`}
+                  width={1600}
+                  height={1100}
+                  className="h-auto w-full object-contain"
+                  sizes="(min-width: 768px) 720px, 100vw"
+                />
+              </div>
+              <div className="space-y-2 px-4 py-4">
+                <p className="text-neutral-900">{show.title} · {show.status}</p>
+                <p>
+                  {show.venue} · {show.location}
+                </p>
+                <p>{show.dates}</p>
+                <p>{show.summary}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ContactSection({ sectionStyle, onNavVisibilityChange }: BaseSectionProps) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const lastScroll = useRef(0);
+
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
+    const handleScroll = () => {
+      const current = node.scrollTop;
+      if (current <= 8) {
+        onNavVisibilityChange(true);
+      } else if (current > lastScroll.current + 6) {
+        onNavVisibilityChange(false);
+      } else if (current < lastScroll.current - 6) {
+        onNavVisibilityChange(true);
+      }
+      lastScroll.current = current;
+    };
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => node.removeEventListener("scroll", handleScroll);
+  }, [onNavVisibilityChange]);
+
+  return (
+    <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
+      <div ref={scrollRef} className="flex h-full w-full flex-col overflow-y-auto px-6 pt-6 sm:px-10" style={{ paddingBottom: BOTTOM_INSET }}>
+        <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
+          {contacts.map((item) => (
+            <Link key={item.label} href={item.href} className="border border-neutral-200 px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">{item.label}</p>
+              <p className="mt-1 text-neutral-900">{item.value}</p>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
