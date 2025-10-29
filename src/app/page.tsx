@@ -171,6 +171,8 @@ const contacts = [
   },
 ];
 
+const NAV_BAR_HEIGHT = 64;
+
 export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAllWorks, setShowAllWorks] = useState(false);
@@ -212,12 +214,12 @@ export default function Page() {
   };
 
   const sectionStyle = {
-    minHeight: "calc(100vh - 72px)",
+    minHeight: `calc(100vh - ${NAV_BAR_HEIGHT}px)`,
   };
 
   const renderBio = () => (
     <div
-      className="flex min-w-full justify-center bg-neutral-100 px-4 pb-16 pt-10 sm:px-6"
+      className="flex min-w-full justify-center bg-neutral-100 px-4 pb-12 pt-10 sm:px-6"
       style={sectionStyle}
     >
       <article className="flex w-full max-w-xl flex-col border border-neutral-200 bg-white">
@@ -249,7 +251,7 @@ export default function Page() {
   );
 
   const renderCV = () => (
-    <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
+    <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
       <div className="space-y-6 text-sm text-neutral-700">
         {cvSections.map((section) => (
           <div key={section.title} className="border border-neutral-200 px-4 py-4">
@@ -271,27 +273,34 @@ export default function Page() {
       const yearB = parseInt(b.year, 10);
       return worksSort === "newest" ? yearB - yearA : yearA - yearB;
     });
+    const featured = sortedWorks.slice(0, 3);
 
-    if (showAllWorks) {
-      return (
-        <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-          <div className="flex flex-wrap items-center gap-3 border border-neutral-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-600">
-            <button
-              type="button"
-              onClick={() => setWorksSort("newest")}
-              className={`px-3 py-1 ${worksSort === "newest" ? "bg-neutral-900 text-white" : "bg-white"}`}
-            >
-              Newest
-            </button>
-            <button
-              type="button"
-              onClick={() => setWorksSort("oldest")}
-              className={`px-3 py-1 ${worksSort === "oldest" ? "bg-neutral-900 text-white" : "bg-white"}`}
-            >
-              Oldest
-            </button>
-            <span className="ml-auto text-[11px] text-neutral-500">Catalogue view</span>
-          </div>
+    return (
+      <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
+        <div className="flex flex-wrap items-center gap-3 border border-neutral-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-600">
+          <button
+            type="button"
+            onClick={() => setWorksSort("newest")}
+            className={`px-3 py-1 ${worksSort === "newest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+          >
+            Newest
+          </button>
+          <button
+            type="button"
+            onClick={() => setWorksSort("oldest")}
+            className={`px-3 py-1 ${worksSort === "oldest" ? "bg-neutral-900 text-white" : "bg-white"}`}
+          >
+            Oldest
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAllWorks((prev) => !prev)}
+            className="ml-auto border border-neutral-900 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-900"
+          >
+            {showAllWorks ? "View less" : "View all"}
+          </button>
+        </div>
+        {showAllWorks ? (
           <div className="mt-6 space-y-3">
             {sortedWorks.map((work) => (
               <div key={work.title} className="flex items-start gap-3 border border-neutral-200 p-3">
@@ -327,78 +336,49 @@ export default function Page() {
               </div>
             ))}
           </div>
-        </div>
-      );
-    }
-
-    const featured = sortedWorks.slice(0, 3);
-
-    return (
-      <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
-        <div className="flex flex-wrap items-center gap-3 border border-neutral-200 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-600">
-          <button
-            type="button"
-            onClick={() => setWorksSort("newest")}
-            className={`px-3 py-1 ${worksSort === "newest" ? "bg-neutral-900 text-white" : "bg-white"}`}
-          >
-            Newest
-          </button>
-          <button
-            type="button"
-            onClick={() => setWorksSort("oldest")}
-            className={`px-3 py-1 ${worksSort === "oldest" ? "bg-neutral-900 text-white" : "bg-white"}`}
-          >
-            Oldest
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowAllWorks((prev) => !prev)}
-            className="ml-auto border border-neutral-900 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-900"
-          >
-            {showAllWorks ? "View less" : "View all"}
-          </button>
-        </div>
-        <div className="mt-6 space-y-8">
-          {featured.map((work) => (
-            <article key={work.title} className="border border-neutral-200">
-              <div className="relative aspect-[3/2] bg-neutral-100">
-                <Image
-                  src={work.image}
-                  alt={`${work.title} artwork`}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 768px) 720px, 100vw"
-                />
-              </div>
-              <div className="space-y-1 px-4 py-4 text-sm text-neutral-700">
-                <p className="text-lg text-neutral-900">{work.title}</p>
-                <p>{work.year}</p>
-                <p>{work.medium}</p>
-                <p>{work.dimensions}</p>
-                <p>{work.price}</p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.open(
-                      `mailto:${profile.enquiriesEmail}?subject=Artwork enquiry: ${encodeURIComponent(
-                        work.title,
-                      )}`,
-                    )
-                  }
-                  className="mt-3 border border-neutral-900 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-900"
-                >
-                  Enquire
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+        ) : (
+          <div className="mt-6 space-y-8">
+            {featured.map((work) => (
+              <article key={work.title} className="border border-neutral-200">
+                <div className="relative aspect-[3/2] bg-neutral-100">
+                  <Image
+                    src={work.image}
+                    alt={`${work.title} artwork`}
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 768px) 720px, 100vw"
+                  />
+                </div>
+                <div className="space-y-1 px-4 py-4 text-sm text-neutral-700">
+                  <p className="text-lg text-neutral-900">{work.title}</p>
+                  <p>{work.year}</p>
+                  <p>{work.medium}</p>
+                  <p>{work.dimensions}</p>
+                  <p>{work.price}</p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.open(
+                        `mailto:${profile.enquiriesEmail}?subject=Artwork enquiry: ${encodeURIComponent(
+                          work.title,
+                        )}`,
+                      )
+                    }
+                    className="mt-3 border border-neutral-900 px-4 py-2 text-xs uppercase tracking-[0.2em] text-neutral-900"
+                  >
+                    Enquire
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
 
   const renderExhibitions = () => (
-    <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
+    <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
       <div className="space-y-6 text-sm text-neutral-700">
         {exhibitions.map((show) => (
           <article key={show.title} className="border border-neutral-200">
@@ -426,7 +406,7 @@ export default function Page() {
   );
 
   const renderContact = () => (
-    <div className="flex min-w-full flex-col px-6 pb-24 pt-10 sm:px-10" style={sectionStyle}>
+    <div className="flex min-w-full flex-col px-6 pb-12 pt-10 sm:px-10" style={sectionStyle}>
       <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
         {contacts.map((item) => (
           <Link key={item.label} href={item.href} className="border border-neutral-200 px-4 py-4">
@@ -447,7 +427,7 @@ export default function Page() {
   };
 
   return (
-    <main className="bg-white text-neutral-900 pb-[72px]">
+    <main className="bg-white text-neutral-900 pb-[64px]">
       <div
         className="overflow-hidden"
         onTouchStart={handleTouchStart}
