@@ -282,7 +282,7 @@ export default function Page() {
 
   const renderExhibitions = () => (
     <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-6 sm:px-10">
+      <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10">
         <div className="space-y-6 text-sm text-neutral-700">
           {exhibitions.map((show) => (
             <article key={show.title} className="border border-neutral-200 bg-white">
@@ -431,7 +431,7 @@ function WorksSection({
 
   return (
     <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div ref={scrollRef} className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-6 sm:px-10">
+      <div ref={scrollRef} className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10">
         <div
           className={`sticky top-0 z-10 -mx-6 border-b border-neutral-200 bg-white transition-transform duration-200 sm:-mx-10 ${toolbarVisible ? "translate-y-0" : "-translate-y-full"}`}
         >
