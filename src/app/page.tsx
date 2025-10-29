@@ -168,7 +168,7 @@ const SLIDER_HEIGHT = `calc(100vh - ${NAV_BAR_HEIGHT}px)`;
 
 export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [showAllWorks, setShowAllWorks] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [worksSort, setWorksSort] = useState<"newest" | "oldest">("newest");
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
@@ -271,8 +271,8 @@ export default function Page() {
         works={works}
         worksSort={worksSort}
         setWorksSort={setWorksSort}
-        showAll={showAllWorks}
-        setShowAll={setShowAllWorks}
+        showAll={showAll}
+        setShowAll={setShowAll}
         sectionStyle={sectionStyle}
         enquiriesEmail={profile.enquiriesEmail}
       />
@@ -286,15 +286,16 @@ export default function Page() {
         <div className="space-y-6 text-sm text-neutral-700">
           {exhibitions.map((show) => (
             <article key={show.title} className="border border-neutral-200 bg-white">
-              <Image
-                src={show.image}
-                alt={`${show.title} installation view`}
-                width={1600}
-                height={1100}
-                className="h-auto w-full object-cover"
-                sizes="(min-width: 768px) 720px, 100vw"
-                style={{ aspectRatio: "4 / 3" }}
-              />
+              <div className="bg-neutral-100 p-4">
+                <Image
+                  src={show.image}
+                  alt={`${show.title} installation view`}
+                  width={1600}
+                  height={1100}
+                  className="h-auto w-full object-contain"
+                  sizes="(min-width: 768px) 720px, 100vw"
+                />
+              </div>
               <div className="space-y-2 px-4 py-4">
                 <p className="text-neutral-900">{show.title} · {show.status}</p>
                 <p>
@@ -506,15 +507,16 @@ function WorksSection({
           <div className="mt-6 space-y-8">
             {featured.map((work) => (
               <article key={work.title} className="border border-neutral-200 bg-white">
-                <Image
-                  src={work.image}
-                  alt={`${work.title} artwork`}
-                  width={1600}
-                  height={1200}
-                  className="h-auto w-full object-cover"
-                  sizes="(min-width: 768px) 720px, 100vw"
-                  style={{ aspectRatio: "4 / 3" }}
-                />
+                <div className="bg-neutral-100 p-4">
+                  <Image
+                    src={work.image}
+                    alt={`${work.title} artwork`}
+                    width={1600}
+                    height={1200}
+                    className="h-auto w-full object-contain"
+                    sizes="(min-width: 768px) 720px, 100vw"
+                  />
+                </div>
                 <div className="space-y-1 px-4 py-4 text-sm text-neutral-700">
                   <p className="text-lg text-neutral-900">{work.title}</p>
                   <p>{work.year}</p>
