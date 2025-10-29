@@ -1,7 +1,14 @@
 'use client';
 
 import type { CSSProperties, ReactElement, TouchEvent } from "react";
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -164,7 +171,7 @@ const contacts = [
 ];
 
 const NAV_BAR_HEIGHT = 52;
-const SLIDER_HEIGHT = `calc(100vh - ${NAV_BAR_HEIGHT}px)`;
+const SLIDER_HEIGHT = "100vh";
 
 export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -172,9 +179,47 @@ export default function Page() {
   const [worksSort, setWorksSort] = useState<"newest" | "oldest">("newest");
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const scrollContainers = useRef<Record<SectionId, HTMLDivElement | null>>({
+    bio: null,
+    cv: null,
+    works: null,
+    exhibitions: null,
+    contact: null,
+  });
+  const [navVisible, setNavVisible] = useState(true);
+  const navLastScroll = useRef(0);
+
+  const registerScrollContainer = useCallback(
+    (id: SectionId, node: HTMLDivElement | null) => {
+      scrollContainers.current[id] = node;
+    },
+    [],
+  );
+  const setBioScrollRef = useCallback(
+    (node: HTMLDivElement | null) => registerScrollContainer("bio", node),
+    [registerScrollContainer],
+  );
+  const setCVScrollRef = useCallback(
+    (node: HTMLDivElement | null) => registerScrollContainer("cv", node),
+    [registerScrollContainer],
+  );
+  const setWorksScrollRef = useCallback(
+    (node: HTMLDivElement | null) => registerScrollContainer("works", node),
+    [registerScrollContainer],
+  );
+  const setExhibitionsScrollRef = useCallback(
+    (node: HTMLDivElement | null) => registerScrollContainer("exhibitions", node),
+    [registerScrollContainer],
+  );
+  const setContactScrollRef = useCallback(
+    (node: HTMLDivElement | null) => registerScrollContainer("contact", node),
+    [registerScrollContainer],
+  );
 
   const goToIndex = (index: number) => {
     if (index < 0 || index >= sections.length) return;
+    navLastScroll.current = 0;
+    setNavVisible(true);
     setActiveIndex(index);
   };
 
@@ -202,6 +247,29 @@ export default function Page() {
     touchEndX.current = null;
   };
 
+  useEffect(() => {
+    const sectionId = sections[activeIndex].id;
+    const node = scrollContainers.current[sectionId];
+    if (!node) return;
+
+    const handleScroll = () => {
+      const current = node.scrollTop;
+      if (current <= 8) {
+        setNavVisible(true);
+      } else if (current > navLastScroll.current + 6) {
+        setNavVisible(false);
+      } else if (current < navLastScroll.current) {
+        setNavVisible(true);
+      }
+      navLastScroll.current = current;
+    };
+
+    navLastScroll.current = node.scrollTop;
+
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => node.removeEventListener("scroll", handleScroll);
+  }, [activeIndex]);
+
   const sliderStyle = {
     transform: `translateX(-${activeIndex * 100}%)`,
   } as const;
@@ -215,7 +283,11 @@ export default function Page() {
       className="flex basis-full min-w-full flex-shrink-0 justify-center bg-neutral-100"
       style={sectionStyle}
     >
-      <div className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pb-8 pt-6 sm:px-6">
+      <div
+        ref={setBioScrollRef}
+        className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pb-8 pt-6 sm:px-6"
+        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
+      >
         <article className="flex w-full flex-col">
           <div className="bg-white">
             <Image
@@ -248,7 +320,11 @@ export default function Page() {
 
   const renderCV = () => (
     <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pb-8 pt-6 sm:px-6">
+      <div
+        ref={setCVScrollRef}
+        className="flex h-full w-full max-w-xl flex-col overflow-y-auto px-4 pb-8 pt-6 sm:px-6"
+        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
+      >
         <div className="space-y-6 text-sm text-neutral-700">
           {cvSections.map((section) => (
             <div key={section.title} className="border border-neutral-200 px-4 py-4">
@@ -275,14 +351,19 @@ export default function Page() {
         setShowAll={setShowAll}
         sectionStyle={sectionStyle}
         enquiriesEmail={profile.enquiriesEmail}
+        navVisible={navVisible}
+        registerScrollContainer={setWorksScrollRef}
       />
     );
   };
 
-
   const renderExhibitions = () => (
     <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10">
+      <div
+        ref={setExhibitionsScrollRef}
+        className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10"
+        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
+      >
         <div className="space-y-6 text-sm text-neutral-700">
           {exhibitions.map((show) => (
             <article key={show.title} className="border border-neutral-200 bg-white">
@@ -314,7 +395,11 @@ export default function Page() {
 
   const renderContact = () => (
     <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-6 sm:px-10">
+      <div
+        ref={setContactScrollRef}
+        className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-6 sm:px-10"
+        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
+      >
         <div className="grid gap-3 text-sm text-neutral-700 sm:grid-cols-3">
           {contacts.map((item) => (
             <Link key={item.label} href={item.href} className="border border-neutral-200 px-4 py-4">
@@ -356,7 +441,9 @@ export default function Page() {
       </div>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white"
+        className={`fixed bottom-0 left-0 right-0 z-20 border-t border-neutral-200 bg-white transition-transform duration-200 ${
+          navVisible ? "translate-y-0" : "translate-y-full"
+        }`}
         style={{ height: NAV_BAR_HEIGHT }}
       >
         <div className="mx-auto flex h-full w-full max-w-md divide-x divide-neutral-200 text-xs uppercase tracking-[0.2em] text-neutral-600">
@@ -389,6 +476,8 @@ type WorksSectionProps = {
   setShowAll: Dispatch<SetStateAction<boolean>>;
   sectionStyle: CSSProperties;
   enquiriesEmail: string;
+  navVisible: boolean;
+  registerScrollContainer: (node: HTMLDivElement | null) => void;
 };
 
 function WorksSection({
@@ -399,14 +488,24 @@ function WorksSection({
   setShowAll,
   sectionStyle,
   enquiriesEmail,
+  navVisible,
+  registerScrollContainer,
 }: WorksSectionProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [toolbarVisible, setToolbarVisible] = useState(true);
   const lastScroll = useRef(0);
+  const setScrollNode = useCallback(
+    (node: HTMLDivElement | null) => {
+      scrollRef.current = node;
+      registerScrollContainer(node);
+    },
+    [registerScrollContainer],
+  );
 
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return;
+    lastScroll.current = node.scrollTop;
     const handleScroll = () => {
       const current = node.scrollTop;
       if (current <= 8) {
@@ -431,7 +530,11 @@ function WorksSection({
 
   return (
     <div className="flex basis-full min-w-full flex-shrink-0 bg-white" style={sectionStyle}>
-      <div ref={scrollRef} className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10">
+      <div
+        ref={setScrollNode}
+        className="flex h-full w-full flex-col overflow-y-auto px-6 pb-8 pt-0 sm:px-10"
+        style={{ paddingBottom: navVisible ? NAV_BAR_HEIGHT : 0 }}
+      >
         <div
           className={`sticky top-0 z-10 -mx-6 border-b border-neutral-200 bg-white transition-transform duration-200 sm:-mx-10 ${toolbarVisible ? "translate-y-0" : "-translate-y-full"}`}
         >
