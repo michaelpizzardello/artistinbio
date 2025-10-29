@@ -127,7 +127,7 @@ const exhibitions: Exhibition[] = [
     summary:
       "Immersive light environment that shifts colour temperature with visitor flow and pairs on-site work with a remote documentation kit.",
     image:
-      "https://images.unsplash.com/photo-1518005068251-3790027bf73e?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1526402469554-49ae4e56c5b8?auto=format&fit=crop&w=1600&q=80",
   },
   {
     title: "Sensors & Sentiments",
@@ -138,7 +138,7 @@ const exhibitions: Exhibition[] = [
     summary:
       "Group exhibition focused on intimate technologies. Presented Night Data with live sensor-responsive performance.",
     image:
-      "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1471295253337-3ceaaedca402?auto=format&fit=crop&w=1600&q=80",
   },
   {
     title: "Signal Festival Commission",
@@ -149,7 +149,7 @@ const exhibitions: Exhibition[] = [
     summary:
       "Projection mapping commission translating family photo archives into dynamic street-scale visuals across historic facades.",
     image:
-      "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1600&q=80",
   },
 ];
 
@@ -301,6 +301,13 @@ export default function Page() {
               </div>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setShowAllWorks(false)}
+            className="mt-6 border border-neutral-900 px-5 py-2 text-xs uppercase tracking-[0.2em] text-neutral-900"
+          >
+            Show featured view
+          </button>
         </div>
       );
     }
